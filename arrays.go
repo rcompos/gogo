@@ -29,4 +29,7 @@ func main() {
     }
     fmt.Println("2d: ", twoD)
 
+	array00 := [...]int{ 0, 2, 4, 6, 8, 10 }
+	fmt.Println(array00)
+
 }
