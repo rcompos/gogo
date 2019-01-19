@@ -37,16 +37,23 @@ func main() {
 	}
 
 	//pods, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
-	//pods, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{})
-	pods, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{
-		LabelSelector: "function=isprime",
-	})
+	pods, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{})
+	//pods, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{
+	//	LabelSelector: "function=isprime",
+	//})
 	if err != nil {
 		log.Fatalln("failed to get pods:", err)
 	}
 
 	// print pods
-	for i, pod := range pods.Items {
-		fmt.Printf("[%d] %s\n", i, pod.GetName())
+	//for i, pod := range pods.Items {
+	//	fmt.Printf("[%d] %s\n", i, pod.GetName())
+	//}
+	for _, pod := range pods.Items {
+		//fmt.Println(pod.Name, pod.Status.PodIP)
+		//fmt.Println(pod.Name, pod.Status)
+		//fmt.Println(pod.Name, pod.Status.ContainerStatuses)
+		fmt.Println(pod.Name, pod.Status.ContainerStatuses)
+		//fmt.Println(pod.Name, pod.Status.Phase)
 	}
 }
