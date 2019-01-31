@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
+	//"strings"
 	//"regexp"
 	"encoding/json"
 
@@ -15,14 +15,13 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// This program lists the pods in a cluster equivalent to
-//
-// kubectl get pods
+// This program lists the pods in a cluster
 //
 func main() {
-	var ns, nsall string
+	var ns string
+	var nsall bool
 	flag.StringVar(&ns, "namespace", "default", "K8s namespace")
-	flag.StringVar(&nsall, "all-namespaces", "", "All namespaces")
+	flag.BoolVar(&nsall, "all-namespaces", false, "All namespaces")
 	flag.Parse()
 	fmt.Println("namespace : ", ns)
 	//fmt.Println("all-namespaces : ", nsall)
@@ -41,98 +40,67 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if nsall != "" {
-
-		fmt.Println("NSALL: ", nsall)
-
+	if nsall == true {
 		// Get all namespaces in cluster
 		namespaces, err := clientset.CoreV1().Namespaces().List(metav1.ListOptions{})
 		if err != nil {
 			log.Fatalln("failed to get namespaces:", err)
 		}
-
 		for _, namespace := range namespaces.Items {
-			fmt.Println("####  ", namespace.Name, "  ####")
-			//pods, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
-			//pods, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{})
-			pods, err := clientset.CoreV1().Pods(string(namespace.Name)).List(metav1.ListOptions{})
-			//pods, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{
-			//	LabelSelector: "function=isprime",
-			//})
-			if err != nil {
-				log.Fatalln("failed to get pods:", err)
-			}
 
-			// print pods
-			//for i, pod := range pods.Items {
-			//	fmt.Printf("[%d] %s\n", i, pod.GetName())
-			//}
-			//reggie := regexp.MustCompile(`.*Terminated.*`)
-			for _, pod := range pods.Items {
-				//fmt.Println(pod.Name, pod.Status.PodIP)
-				//fmt.Println(pod.Name, pod.Status)
-				//fmt.Println(pod.Name, pod.Status.ContainerStatuses)
-				//fmt.Printf("%q\n", reggie.FindString(pod.Status.ContainerStatuses))
-				//fmt.Printf("%q\n", reggie.MatchString("asdfaTrminated kwik"))
-				b := pod.Status.ContainerStatuses
-				//a := &b
-			    out, err := json.Marshal(b)
-				if err != nil {
-					panic (err)
-				}
-				//fmt.Println(string(out))
-				fmt.Println("OUT: ", string(out))
-				//fmt.Println(a)
-				//fmt.Println(b)
-				fmt.Println(strings.Contains(string(out), "terminated"))
-				//fmt.Printf(strings.Contains(pod.Status.ContainerStatuses, "Terminated"))
-				//fmt.Printf("%s\n", strings.Contains(out, "Terminated"))
-			}
+			fmt.Println("Namespace: ", namespace.Name)
+			getpod(namespace.Name)
 		}
-
 	} else {
+		fmt.Println("Namespace: ", ns)
+		getpod(ns)
+	}
 
-		fmt.Println("####  ", ns, "  ####")
-		//pods, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
-		//pods, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{})
+}
+
+func getpod(ns string) {
+
+	//fmt.Println(ns)
+
+    // Bootstrap k8s configuration from local   Kubernetes config file
+    kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
+    //log.Println("Using kubeconfig file: ", kubeconfig)
+    config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+	// Create an rest client not targeting specific API version
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+		//fmt.Println("####  ", ns, "  ####")
 		pods, err := clientset.CoreV1().Pods(string(ns)).List(metav1.ListOptions{})
-		//pods, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{
-		//	LabelSelector: "function=isprime",
-		//})
 		if err != nil {
 			log.Fatalln("failed to get pods:", err)
 		}
-
-		// print pods
-		//for i, pod := range pods.Items {
-		//	fmt.Printf("[%d] %s\n", i, pod.GetName())
-		//}
-		//reggie := regexp.MustCompile(`.*Terminated.*`)
 		for _, pod := range pods.Items {
-			//fmt.Println(pod.Name, pod.Status.PodIP)
-			//fmt.Println(pod.Name, pod.Status)
-			//fmt.Println(pod.Name, pod.Status.ContainerStatuses)
-			//fmt.Printf("%q\n", reggie.FindString(pod.Status.ContainerStatuses))
-			//fmt.Printf("%q\n", reggie.MatchString("asdfaTrminated kwik"))
-			b := pod.Status.ContainerStatuses
-			//a := &b
-		    out, err := json.Marshal(b)
+
+			//b := pod.Status.ContainerStatuses
+		    //out, err := json.Marshal(b)
+			//if err != nil {
+			//	panic (err)
+			//}
+			//fmt.Println(string(out)) 
+
+			c := pod.Status.Phase
+		    outc, err := json.Marshal(c)
 			if err != nil {
 				panic (err)
 			}
-			//fmt.Println(string(out))
-			//fmt.Println("OUT: ", string(out))
-			//fmt.Println(a)
-			//fmt.Println(b)
-			//fmt.Println(strings.Contains(string(out), "\"lastState\":{\"terminated\""))
-			containsy := strings.Contains(string(out), "\"lastState\":{\"terminated\"")
-			if containsy == true {
-				fmt.Println("OUT: ", string(out)) 
-			}
-			//fmt.Printf(strings.Contains(pod.Status.ContainerStatuses, "Terminated"))
-			//fmt.Printf("%s\n", strings.Contains(out, "Terminated"))
+			fmt.Println("OUTC: ", string(outc)) 
+
+			//containsy := strings.Contains(string(outc), "\"lastState\":{\"terminated\"")
+			////containsy := strings.Contains(string(out), "\"lastState\":{},\"ready\"")
+			//if containsy == true {
+			//	fmt.Println(string(out)) 
+			//}
 		}
-
-	}
-
 }
