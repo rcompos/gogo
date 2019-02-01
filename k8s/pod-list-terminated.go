@@ -49,58 +49,44 @@ func main() {
 		for _, namespace := range namespaces.Items {
 
 			fmt.Println("Namespace: ", namespace.Name)
-			getpod(namespace.Name)
+			getpod(namespace.Name, clientset)
 		}
 	} else {
 		fmt.Println("Namespace: ", ns)
-		getpod(ns)
+		getpod(ns, clientset)
 	}
 
 }
 
-func getpod(ns string) {
+func getpod(ns string, c *kubernetes.Clientset) {
 
-	//fmt.Println(ns)
-
-    // Bootstrap k8s configuration from local   Kubernetes config file
-    kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-    //log.Println("Using kubeconfig file: ", kubeconfig)
-    config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-	// Create an rest client not targeting specific API version
-	clientset, err := kubernetes.NewForConfig(config)
+	//fmt.Println("####  ", ns, "  ####")
+	pods, err := c.CoreV1().Pods(string(ns)).List(metav1.ListOptions{})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("failed to get pods:", err)
+	}
+	for _, pod := range pods.Items {
+
+		b := pod.Status.ContainerStatuses
+		outb, err := json.Marshal(b)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("B> ", string(outb))
+
+		//c := pod.Status.Phase
+		c := pod.Status.Conditions
+		outc, err := json.Marshal(c)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("C> ", string(outc))
+
+		//containsy := strings.Contains(string(outc), "\"lastState\":{\"terminated\"")
+		////containsy := strings.Contains(string(out), "\"lastState\":{},\"ready\"")
+		//if containsy == true {
+		//	fmt.Println(string(out))
+		//}
 	}
 
-		//fmt.Println("####  ", ns, "  ####")
-		pods, err := clientset.CoreV1().Pods(string(ns)).List(metav1.ListOptions{})
-		if err != nil {
-			log.Fatalln("failed to get pods:", err)
-		}
-		for _, pod := range pods.Items {
-
-			//b := pod.Status.ContainerStatuses
-		    //out, err := json.Marshal(b)
-			//if err != nil {
-			//	panic (err)
-			//}
-			//fmt.Println(string(out)) 
-
-			c := pod.Status.Phase
-		    outc, err := json.Marshal(c)
-			if err != nil {
-				panic (err)
-			}
-			fmt.Println("OUTC: ", string(outc)) 
-
-			//containsy := strings.Contains(string(outc), "\"lastState\":{\"terminated\"")
-			////containsy := strings.Contains(string(out), "\"lastState\":{},\"ready\"")
-			//if containsy == true {
-			//	fmt.Println(string(out)) 
-			//}
-		}
 }
