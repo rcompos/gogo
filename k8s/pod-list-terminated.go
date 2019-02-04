@@ -76,11 +76,25 @@ func getpod(ns string, c *kubernetes.Clientset) {
 
 		//c := pod.Status.Phase
 		c := pod.Status.Conditions
-		outc, err := json.Marshal(c)
-		if err != nil {
+		for j := 0; j < len(c); j++ {
+			//d := c[j].Type
+			d := c[j].Type
+			outc, err := json.Marshal(d)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println("C> ", string(outc))
+		}
+
+		byt := []byte(`{"num":6.13,"strs":["a","b"]}`)
+	    var dat map[string]interface{}
+	    if err := json.Unmarshal(byt, &dat); err != nil {
 			panic(err)
 		}
-		fmt.Println("C> ", string(outc))
+		//fmt.Println(dat)
+		strs := dat["strs"].([]interface{})
+		str1 := strs[0].(string)
+		fmt.Println("D> ", str1)
 
 		//containsy := strings.Contains(string(outc), "\"lastState\":{\"terminated\"")
 		////containsy := strings.Contains(string(out), "\"lastState\":{},\"ready\"")
