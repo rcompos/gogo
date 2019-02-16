@@ -9,7 +9,6 @@ import (
 	//"strings"
 	//"regexp"
 	"encoding/json"
-	"reflect"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -44,8 +43,6 @@ func main() {
 	if nsall == true {
 		// Get all namespaces in cluster
 		namespaces, err := clientset.CoreV1().Namespaces().List(metav1.ListOptions{})
-		fmt.Println("Type of namespaces: ", reflect.TypeOf(namespaces))
-		fmt.Println("Value of namespaces: ", reflect.ValueOf(namespaces))
 		if err != nil {
 			log.Fatalln("failed to get namespaces:", err)
 		}
@@ -56,7 +53,6 @@ func main() {
 		}
 	} else {
 		fmt.Println("Namespace: ", ns)
-		fmt.Println("Value of namespaces: ", reflect.ValueOf(ns))
 		getpod(ns, clientset)
 	}
 
@@ -72,22 +68,14 @@ func getpod(ns string, c *kubernetes.Clientset) {
 	for _, pod := range pods.Items {
 
 		b := pod.Status.ContainerStatuses
-		fmt.Println("Type of b: ", reflect.TypeOf(b))
-		fmt.Println("Value of b: ", reflect.ValueOf(b))
-
-		fmt.Println("b> ", b)
-
 		outb, err := json.Marshal(b)
 		if err != nil {
 			panic(err)
 		}
 		fmt.Println("B> ", string(outb))
-		fmt.Println(" ")
 
 		//c := pod.Status.Phase
 		c := pod.Status.Conditions
-		fmt.Println("Type of c: ", reflect.TypeOf(c))
-		fmt.Println("Value of c: ", reflect.ValueOf(c))
 		for j := 0; j < len(c); j++ {
 			//d := c[j].Type
 			d := c[j].Type
@@ -98,16 +86,14 @@ func getpod(ns string, c *kubernetes.Clientset) {
 			fmt.Println("C> ", string(outc))
 		}
 
-		byt := []byte(`{"num":6.13,"strs":["alpha","beta","gamma","delta"]}`)
+		byt := []byte(`{"num":6.13,"strs":["a","b"]}`)
 	    var dat map[string]interface{}
 	    if err := json.Unmarshal(byt, &dat); err != nil {
 			panic(err)
 		}
 		//fmt.Println(dat)
 		strs := dat["strs"].([]interface{})
-		str0 := strs[0].(string)
-		str1 := strs[1].(string)
-		fmt.Println("D> ", str0)
+		str1 := strs[0].(string)
 		fmt.Println("D> ", str1)
 
 		//containsy := strings.Contains(string(outc), "\"lastState\":{\"terminated\"")

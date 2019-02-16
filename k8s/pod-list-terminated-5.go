@@ -29,7 +29,7 @@ func main() {
 
 	// Bootstrap k8s configuration from local 	Kubernetes config file
 	kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-	//log.Println("# Using kubeconfig file: ", kubeconfig)
+	log.Println("# Using kubeconfig file: ", kubeconfig)
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		log.Fatal(err)
@@ -50,11 +50,11 @@ func main() {
 		//fmt.Println("# Type of namespaces: ", reflect.TypeOf(namespaces))
 		//fmt.Println("# Value of namespaces: ", reflect.ValueOf(namespaces))
 		for _, namespace := range namespaces.Items {
-			//fmt.Println("# Namespace: ", namespace.Name)
+			fmt.Println("# Namespace: ", namespace.Name)
 			getpod(namespace.Name, clientset)
 		}
 	} else {
-		//fmt.Println("# Namespace: ", ns)
+		fmt.Println("# Namespace: ", ns)
 		//fmt.Println("# Value of namespaces: ", reflect.ValueOf(ns))
 		getpod(ns, clientset)
 	}
@@ -108,7 +108,7 @@ func getpod(ns string, c *kubernetes.Clientset) {
 		containsy := strings.Contains(string(outc), "\"lastState\":{\"terminated\"")
 		////containsy := strings.Contains(string(out), "\"lastState\":{},\"ready\"")
 		if containsy == true {
-			fmt.Println(ns, string(outc))
+			fmt.Println("Contains! ", string(outc))
 		}
 	}
 
