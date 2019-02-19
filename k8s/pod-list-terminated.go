@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
+	//"strings"
 	//"regexp"
 	"encoding/json"
 	//"reflect"
@@ -105,11 +105,12 @@ func getpod(ns string, c *kubernetes.Clientset) {
         //fmt.Println("Value of e: ", reflect.ValueOf(e))
         //fmt.Println("Type of e: ", reflect.TypeOf(e))
 
-		containsy := strings.Contains(string(outc), "\"lastState\":{\"terminated\"")
 		////containsy := strings.Contains(string(out), "\"lastState\":{},\"ready\"")
-		if containsy == true {
-			fmt.Println(ns, string(outc))
-		}
+		//containsy := strings.Contains(string(outc), "\"lastState\":{\"terminated\"")
+		//if containsy == true {
+		//	fmt.Println(ns, string(outc))
+		//}
+		fmt.Println(ns, string(outc))
 	}
 
 }
