@@ -1,64 +1,83 @@
 package main
 
-import (
+import(
 	"fmt"
 )
 
-type person struct {
-	age       int
-	weight    int
-	firstName string
-	next      *person
+type Node struct {
+	prev *Node
+	next *Node
+	key  interface{}
+}
+
+type List struct {
+	head *Node
+	tail *Node
+}
+
+func (L *List) Insert(key interface{}) {
+	list := &Node{
+		next: L.head,
+		key:  key,
+	}
+	if L.head != nil {
+		L.head.prev = list
+	}
+	L.head = list
+
+	l := L.head
+	for l.next != nil {
+		l = l.next
+	}
+	L.tail = l
+}
+
+func (l *List) Display() {
+	list := l.head
+	for list != nil {
+		fmt.Printf("%+v ->", list.key)
+		list = list.next
+	}
+	fmt.Println()
+}
+
+func ShowBackwards(list *Node) {
+	for list != nil {
+		fmt.Printf("%v <-", list.key)
+		list = list.prev
+	}
+	fmt.Println()
+}
+
+func (l *List) Reverse() {
+	curr := l.head
+	var prev *Node
+	l.tail = l.head
+	for curr != nil {
+		next := curr.next
+		curr.next = prev
+		prev = curr
+		curr = next
+	}
+	l.head = prev
+	l.Display()
 }
 
 func main() {
-	mike := &person{33, 200, "mike", nil}
-	personList := mike
 
-	greg := &person{34, 443, "greg", nil}
-	james := &person{45, 554, "james", nil}
-	marshall := &person{56, 123, "marshall", nil}
+	fmt.Println("Linked List")
+	link := List{}
+	link.Insert(5)
+	link.Insert(9)
+	link.Insert(13)
+	link.Insert(22)
+	link.Insert(28)
+	link.Insert(36)
+	link.Insert(48)
 
-	personList = addNodeEnd(greg, personList)
-	personList = addNodeEnd(james, personList)
-	personList = addNodeEnd(marshall, personList)
-	//printList(personList)
-	personList = reverseRecurrsive(personList)
-	printList(personList)
-}
+	fmt.Printf("Head: %v\n", link.head.key)
+	fmt.Printf("Tail: %v\n", link.tail.key)
+	link.Display()
+	link.Reverse()
 
-func printList(personList *person) {
-	for p := personList; p != nil; p = p.next {
-		fmt.Println(p)
-	}
-}
-
-
-func addNodeEnd(newPerson, personList *person) *person {
-	if personList == nil {
-		return personList
-	}
-	for p := personList; p != nil; p = p.next {
-		if p.next == nil {
-			p.next = newPerson
-			return personList
-		}
-	}
-	return personList
-}
-
-func reverseRecurrsive(personList *person) *person {
-  if personList == nil {
-    return personList
-  }
-  p := personList
-
-  if p.next == nil {
-    return p
-  } else {
-    newHead := reverseRecurrsive(p.next)
-    p.next.next = p
-    p.next = nil
-    return newHead
-  }
 }
