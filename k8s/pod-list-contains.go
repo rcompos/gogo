@@ -1,11 +1,12 @@
 package main
 
-import ( "flag"
+import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
+	_ "strings"
 	//"regexp"
 	"encoding/json"
 
@@ -20,7 +21,9 @@ import ( "flag"
 //
 func main() {
 	var ns string
+	var ss string
 	flag.StringVar(&ns, "namespace", "default", "K8s namespace")
+	flag.StringVar(&ss, "string", "", "Search string")
 	flag.Parse()
 	fmt.Println("K8s Namespace: ", ns)
 
@@ -67,7 +70,9 @@ func main() {
 		fmt.Println(string(out))
 		//fmt.Println(a)
 		//fmt.Println(b)
-		fmt.Println(strings.Contains(string(out), "heketi"))
+		//fmt.Println(strings.Contains(string(out), "heketi"))
+		//fmt.Println(strings.Contains(string(out), ss))
+		//fmt.Println(strings.Contains(string(out), "asdXlYaZfasdfasdfsfd"))
 		//fmt.Printf(strings.Contains(pod.Status.ContainerStatuses, "Terminated"))
 		//fmt.Printf("%s\n", strings.Contains(out, "Terminated"))
 	}
