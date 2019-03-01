@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	//"strings"
-	//"regexp"
+	_ "strings"
+	"regexp"
 	"encoding/json"
 	//"reflect"
 
@@ -21,8 +21,8 @@ import (
 func main() {
 	var ns string
 	var nsall bool
-	flag.StringVar(&ns, "namespace", "default", "K8s namespace")
-	flag.BoolVar(&nsall, "all-namespaces", false, "All namespaces")
+	flag.StringVar(&ns, "n", "default", "Defined namespace")
+	flag.BoolVar(&nsall, "a", false, "All namespaces")
 	flag.Parse()
 	//fmt.Println("# namespace : ", ns)
 	//fmt.Println("all-namespaces : ", nsall)
@@ -68,6 +68,10 @@ func getpod(ns string, c *kubernetes.Clientset) {
 	if err != nil {
 		log.Fatalln("failed to get pods:", err)
 	}
+
+    //reggie := regexp.MustCompile(`.*Terminated.*`)
+    reggie, _ := regexp.Compile(`.*terminated.*`)
+
 	for _, pod := range pods.Items {
 
 		//b := pod.Status.ContainerStatuses
@@ -91,6 +95,9 @@ func getpod(ns string, c *kubernetes.Clientset) {
 			panic(err)
 		}
 
+		//fmt.Println("###", string(outc))
+		fmt.Printf("%q\n", reggie.FindString(string(outc)))
+
 //		for k := 0; k < len(cs); k++ {
 			//j := pod.Status.ContainerStatuses[k].State
 			//j := cs[k].LastTerminationState
@@ -108,9 +115,12 @@ func getpod(ns string, c *kubernetes.Clientset) {
 		////containsy := strings.Contains(string(out), "\"lastState\":{},\"ready\"")
 		//containsy := strings.Contains(string(outc), "\"lastState\":{\"terminated\"")
 		//if containsy == true {
-		//	fmt.Println(ns, string(outc))
+		//	fmt.Println("TRUE", ns, string(outc))
 		//}
-		fmt.Println(ns, string(outc))
+		//} else {
+		//	fmt.Println("FALSE ", ns, string(outc))
+		//}
+		//fmt.Println(ns, string(outc))
 	}
 
 }
