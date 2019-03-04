@@ -33,7 +33,6 @@ func printList(personList *person) {
 	}
 }
 
-
 func addNodeEnd(newPerson, personList *person) *person {
 	if personList == nil {
 		return personList
