@@ -12,7 +12,6 @@ import (
 	_ "strings"
 	//"reflect"
 
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -23,10 +22,10 @@ import (
 //
 func main() {
 	var ns string
-	var nsall, Delete, Force bool
+	var nsall, DeletePods, Force bool
 	flag.StringVar(&ns, "n", "default", "Define namespace")
 	flag.BoolVar(&nsall, "a", false, "All namespaces")
-	flag.BoolVar(&Delete, "d", false, "Delete pods")
+	flag.BoolVar(&DeletePods, "d", false, "Delete pods")
 	flag.BoolVar(&Force, "f", false, "Force without confirmation")
 	flag.Parse()
 
@@ -43,7 +42,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if Force != true { prompt() }
+	if Force != false { prompt() }
 
 	// Run for a single namespace or loop over all namespaces
 	if nsall == true {
@@ -53,64 +52,50 @@ func main() {
 			log.Fatalln("failed to get namespaces:", err)
 		}
 		for _, namespace := range namespaces.Items {
-			PodsAll := GetPods(namespace.Name, clientset)
-			if Delete != true { 
-				ListPods(namespace.Name, clientset, PodsAll)
-			} else {
-				DeletePods(namespace.Name, clientset, PodsAll)
-			}
+			GetPods(namespace.Name, DeletePods, clientset)
 		}
 	} else {
-		PodsAll := GetPods(ns, clientset)
-		if Delete != true { 
-			ListPods(ns, clientset, PodsAll)
-		} else {
-			DeletePods(ns, clientset, PodsAll)
-		}
+		GetPods(ns, DeletePods, clientset)
 	}
 
 } // func main
 
-func GetPods(ns string, c *kubernetes.Clientset) *v1.PodList {
+func DeletePod(ns string, pod string, c *kubernetes.Clientset) {
+	err := c.CoreV1().Pods(ns).Delete(pod, &metav1.DeleteOptions{})
+	if err != nil {
+		log.Printf("Error deleting pod %s, %s", pod, err)
+	}
+	fmt.Println("Deleted! ", ns, pod)
+}
+
+func GetPods(ns string, d bool, c *kubernetes.Clientset) []string {
+
 	pods, err := c.CoreV1().Pods(string(ns)).List(metav1.ListOptions{
 		FieldSelector: "status.phase!=Running",
 	})
 	if err != nil {
 		log.Fatalln("failed to get pods:", err)
 	}
-	return pods
-}
 
-func ListPods(ns string, c *kubernetes.Clientset, pods *v1.PodList ) {
-	for _, pod := range pods.Items {
-		pname := pod.Name
-		outc, err := json.Marshal(pname)
-		if err != nil {
-			panic(err)
-		}
-		TargetPod := trimQuote(string(outc))
-		fmt.Println("To be Deleted! ", ns, TargetPod)
-	}
-}
-
-func DeletePods(ns string, c *kubernetes.Clientset, pods *v1.PodList ) {
 	var plist []string
 	for _, pod := range pods.Items {
+
 		pname := pod.Name
 		outc, err := json.Marshal(pname)
 		if err != nil {
 			panic(err)
 		}
 		TargetPod := trimQuote(string(outc))
-		//DeletePod(ns, TargetPod, c)
-		//err := c.CoreV1().Pods(ns).Delete(TargetPod, &metav1.DeleteOptions{})
-		//if err != nil {
-		//	log.Printf("Error deleting pod %s, %s", TargetPod, err)
-		//}
-		fmt.Println("Deleted! ", ns, pod)
+		if d {
+			\\DeletePod(ns, TargetPod, c)
+			fmt.Println("To be Deleted! ", ns, pod)
+		} else {
+			fmt.Println(ns, TargetPod)
+		}
 		//Todo:  Add if success then append
 		plist = append(plist, TargetPod)
 	}
+	return plist
 }
 
 func trimQuote(s string) string {
