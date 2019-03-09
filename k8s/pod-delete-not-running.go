@@ -43,7 +43,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if Force != true { prompt() }
 
 	// Run for a single namespace or loop over all namespaces
 	if nsall == true {
@@ -53,19 +52,35 @@ func main() {
 			log.Fatalln("failed to get namespaces:", err)
 		}
 		for _, namespace := range namespaces.Items {
+			//fmt.Println("NS: ", namespace)
 			PodsAll := GetPods(namespace.Name, clientset)
-			if Delete != true { 
-				ListPods(namespace.Name, clientset, PodsAll)
-			} else {
-				DeletePods(namespace.Name, clientset, PodsAll)
+			PodsNum := len(PodsAll.Items)
+			if PodsNum > 0 {
+				if Delete != true {
+					ListPods(namespace.Name, clientset, PodsAll)
+				} else {
+					if Force != true {
+						ListPods(namespace.Name, clientset, PodsAll)
+						prompt()
+					}
+					DeletePods(namespace.Name, clientset, PodsAll)
+				}
 			}
 		}
 	} else {
 		PodsAll := GetPods(ns, clientset)
-		if Delete != true { 
-			ListPods(ns, clientset, PodsAll)
-		} else {
-			DeletePods(ns, clientset, PodsAll)
+		PodsNum := len(PodsAll.Items)
+		//fmt.Println("Num: ", PodsNum)
+		if PodsNum > 0 {
+			if Delete != true {
+				ListPods(ns, clientset, PodsAll)
+			} else {
+				if Force != true {
+					ListPods(ns, clientset, PodsAll)
+					prompt()
+				}
+				DeletePods(ns, clientset, PodsAll)
+			}
 		}
 	}
 
@@ -94,7 +109,6 @@ func ListPods(ns string, c *kubernetes.Clientset, pods *v1.PodList ) {
 }
 
 func DeletePods(ns string, c *kubernetes.Clientset, pods *v1.PodList ) {
-	var plist []string
 	for _, pod := range pods.Items {
 		pname := pod.Name
 		outc, err := json.Marshal(pname)
@@ -102,14 +116,11 @@ func DeletePods(ns string, c *kubernetes.Clientset, pods *v1.PodList ) {
 			panic(err)
 		}
 		TargetPod := trimQuote(string(outc))
-		//DeletePod(ns, TargetPod, c)
-		//err := c.CoreV1().Pods(ns).Delete(TargetPod, &metav1.DeleteOptions{})
-		//if err != nil {
-		//	log.Printf("Error deleting pod %s, %s", TargetPod, err)
-		//}
-		fmt.Println("Deleted! ", ns, pod)
-		//Todo:  Add if success then append
-		plist = append(plist, TargetPod)
+		errDelete := c.CoreV1().Pods(ns).Delete(TargetPod, &metav1.DeleteOptions{})
+		if errDelete != nil {
+			log.Printf("Error deleting pod %s, %s", TargetPod, errDelete)
+		}
+		fmt.Println("Deleted! ", ns, TargetPod)
 	}
 }
 
@@ -123,7 +134,7 @@ func trimQuote(s string) string {
 }
 
 func prompt() {
-    fmt.Printf("-> Press Return key to continue.")
+    fmt.Printf("-> Press Return key to delete pods.")
     scanner := bufio.NewScanner(os.Stdin)
     for scanner.Scan() {
         break
