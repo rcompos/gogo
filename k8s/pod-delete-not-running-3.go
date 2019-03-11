@@ -30,9 +30,6 @@ func main() {
 	flag.BoolVar(&Force, "f", false, "Force without confirmation")
 	flag.Parse()
 
-	var selectField string
-	selectField = "status.phase!=Running"
-
 	// Bootstrap k8s configuration from local Kubernetes config file
 	kubeconfig := filepath.Join(os.Getenv("HOME"), ".kube", "config")
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
@@ -46,6 +43,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+
 	// Run for a single namespace or loop over all namespaces
 	if nsall == true {
 		// Get all namespaces in cluster
@@ -55,7 +53,7 @@ func main() {
 		}
 		for _, namespace := range namespaces.Items {
 			//fmt.Println("NS: ", namespace)
-			PodsAll := GetPods(namespace.Name, clientset, selectField)
+			PodsAll := GetPods(namespace.Name, clientset)
 			PodsNum := len(PodsAll.Items)
 			if PodsNum > 0 {
 				if Delete != true {
@@ -70,7 +68,7 @@ func main() {
 			}
 		}
 	} else {
-		PodsAll := GetPods(ns, clientset, selectField)
+		PodsAll := GetPods(ns, clientset)
 		PodsNum := len(PodsAll.Items)
 		//fmt.Println("Num: ", PodsNum)
 		if PodsNum > 0 {
@@ -88,10 +86,9 @@ func main() {
 
 } // func main
 
-func GetPods(ns string, c *kubernetes.Clientset, sf string) *v1.PodList {
+func GetPods(ns string, c *kubernetes.Clientset) *v1.PodList {
 	pods, err := c.CoreV1().Pods(string(ns)).List(metav1.ListOptions{
-		//FieldSelector: "status.phase!=Running",
-		FieldSelector: sf,
+		FieldSelector: "status.phase!=Running",
 	})
 	if err != nil {
 		log.Fatalln("failed to get pods:", err)
