@@ -3,14 +3,26 @@ package main
 import(
 	"fmt"
 	"strings"
-	"os"
+	//"os"
+	"flag"
 )
 
 func main() {
+	var u string
+	flag.StringVar(&u, "u", "insertionsort", "String to sort")
+	flag.Parse()
+
 	//unsorted := "insertionsort"
+	//unsorted = strings.ToUpper(os.Args[1])
+	unsorted := strings.ToUpper(u)
+	fmt.Println(unsorted)
+
 	//sorted    := insertion_sort(strings.ToUpper(unsorted))
-	sorted    := insertion_sort([]byte(strings.ToUpper(os.Args[1])))
-	fmt.Println("Sorted: ", sorted)
+	//sorted    := insertion_sort([]byte(strings.ToUpper(os.Args[1])))
+	//fmt.Println("Sorted: ", sorted)
+
+	insertion_sort([]byte(unsorted))
+
 }
 
 func insertion_sort(s []byte) string {
