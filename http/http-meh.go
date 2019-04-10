@@ -14,7 +14,7 @@ func main() {
 		fmt.Fprintf(w, "Hello World! I'm a HTTP server!")
 	})
 
-	fs := http.FileServer(http.Dir("src/"))
+	fs := http.FileServer(http.Dir("./src/"))
 	http.Handle("/src/", http.StripPrefix("/src/", fs))
 
 	http.ListenAndServe(":8080", nil)

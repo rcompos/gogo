@@ -1,0 +1,2 @@
+michaelbolton2019/04/06 19:28:13.261415 outfile.go:17: This is a regular message.
+michaelbolton2019/04/06 19:28:13.261543 outfile.go:18: This is a fatal error.
