@@ -1,9 +1,10 @@
 package main
 
-import(
+import (
 	"fmt"
-	"os"
 	"net/http"
+	"os"
+
 	"golang.org/x/net/html"
 )
 
@@ -30,8 +31,8 @@ func main() {
 			fmt.Printf("parsing %s as HTML: %v", url, err)
 		}
 
-		fmt.Println(doc)
+		//fmt.Println(doc)
+		fmt.Printf("%s", doc)
 
 	}
-
 }

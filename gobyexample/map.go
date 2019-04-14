@@ -1,6 +1,6 @@
 package main
 
-import(
+import (
 	"fmt"
 	"math"
 )
@@ -12,7 +12,7 @@ func main() {
 	fmt.Println(x)
 
 	a := []string{"hello", "goodbye", "salutations", "greetings", "howdy"}
-    for _, val := range a {
+	for _, val := range a {
 		fmt.Println(val)
 	}
 
